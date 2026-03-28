@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NJSLA Math Coach — Guhan's Study App</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --purple:#6C4EF6; --purple2:#8B6FF8; --purple-l:#EEE9FF; --purple-m:#C4B5FD;
+  --teal:#10B981; --teal-l:#D1FAE5; --teal-d:#065F46;
+  --amber:#F59E0B; --amber-l:#FEF3C7; --amber-d:#92400E;
+  --coral:#F43F5E; --coral-l:#FFE4E8; --coral-d:#9F1239;
+  --blue:#3B82F6; --blue-l:#EFF6FF;
+  --bg:#F4F1FF; --card:#FFFFFF; --border:#E5E0FF;
+  --text:#1E1B4B; --muted:#6B7280; --shadow:0 4px 20px rgba(108,78,246,.12);
+  --r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* ── SCREENS ── */
+.screen{display:none;min-height:100vh;flex-direction:column;}
+.screen.active{display:flex;}
+
+/* ══ HOME ══ */
+#home{background:linear-gradient(145deg,#F4F1FF 0%,#EDE9FE 60%,#FDF4FF 100%);}
+.home-top{padding:2rem 1.5rem 1rem;text-align:center;}
+.app-logo{font-family:'Baloo 2',cursive;font-size:1.6rem;font-weight:800;color:var(--purple);letter-spacing:-.5px;}
+.app-tagline{font-size:12px;color:var(--muted);margin-top:2px;}
+.student-card{background:var(--card);border-radius:20px;border:1.5px solid var(--border);padding:1.25rem;margin:1rem 1.5rem;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow);}
+.avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--purple2));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#fff;flex-shrink:0;}
+.student-name{font-size:17px;font-weight:800;color:var(--text);}
+.student-sub{font-size:12px;color:var(--muted);margin-top:1px;}
+.level-pill{margin-left:auto;background:var(--purple-l);color:var(--purple);font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;white-space:nowrap;}
+
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 1.5rem 1rem;}
+.stat{background:var(--card);border-radius:14px;border:1px solid var(--border);padding:12px 8px;text-align:center;}
+.stat-val{font-size:22px;font-weight:900;color:var(--purple);}
+.stat-lbl{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-top:2px;}
+
+.section-title{font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0 1.5rem;margin-bottom:8px;}
+
+/* topic mode selector */
+.mode-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 1.5rem 1rem;}
+.mode-btn{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:12px 6px;text-align:center;cursor:pointer;transition:.2s;font-family:'Nunito',sans-serif;}
+.mode-btn:hover,.mode-btn.selected{border-color:var(--purple);background:var(--purple-l);}
+.mode-icon{font-size:22px;margin-bottom:4px;}
+.mode-lbl{font-size:11px;font-weight:800;color:var(--text);}
+
+/* topic list */
+.topic-list{margin:0 1.5rem 1rem;display:flex;flex-direction:column;gap:8px;}
+.topic-row{background:var(--card);border-radius:14px;border:1.5px solid var(--border);padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:.2s;}
+.topic-row:hover{border-color:var(--purple);transform:translateX(3px);}
+.topic-row.mastered{border-color:var(--teal);background:var(--teal-l);}
+.topic-row.locked{opacity:.4;cursor:not-allowed;}
+.topic-icon{font-size:20px;width:36px;text-align:center;}
+.topic-info{flex:1;}
+.topic-name{font-size:14px;font-weight:800;color:var(--text);}
+.topic-meta{font-size:11px;color:var(--muted);margin-top:1px;}
+.topic-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;}
+.badge-done{background:var(--teal-l);color:var(--teal-d);}
+.badge-new{background:var(--purple-l);color:var(--purple);}
+.badge-lock{background:#F3F4F6;color:var(--muted);}
+
+.review-banner{margin:0 1.5rem 1rem;background:linear-gradient(135deg,var(--amber),#F97316);border-radius:16px;padding:14px 16px;color:#fff;display:flex;align-items:center;gap:12px;cursor:pointer;display:none;}
+.review-banner.show{display:flex;}
+.review-text{flex:1;}
+.review-title{font-size:14px;font-weight:800;}
+.review-sub{font-size:11px;opacity:.9;margin-top:1px;}
+
+.start-fab{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--purple);color:#fff;border:none;border-radius:99px;padding:16px 36px;font-family:'Nunito',sans-serif;font-size:16px;font-weight:900;cursor:pointer;box-shadow:0 6px 24px rgba(108,78,246,.4);transition:.2s;z-index:50;white-space:nowrap;}
+.start-fab:hover{background:#5538E0;transform:translateX(-50%) translateY(-2px);}
+.start-fab:active{transform:translateX(-50%) scale(.97);}
+
+/* parent btn */
+.parent-btn{display:block;margin:0 1.5rem 100px;background:none;border:1.5px solid var(--border);border-radius:14px;padding:12px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;text-align:center;width:calc(100% - 3rem);}
+.parent-btn:hover{border-color:var(--purple);color:var(--purple);}
+
+/* ══ LESSON ══ */
+#lesson{background:var(--bg);}
+.lesson-hdr{background:var(--purple);color:#fff;padding:1rem 1.25rem;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:40;}
+.back-btn{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:10px;padding:6px 12px;font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;cursor:pointer;}
+.lesson-hdr-info{flex:1;}
+.lesson-hdr-day{font-size:10px;opacity:.8;text-transform:uppercase;letter-spacing:.06em;}
+.lesson-hdr-name{font-size:15px;font-weight:800;}
+.timer-chip{background:rgba(255,255,255,.2);border-radius:99px;padding:4px 12px;font-size:13px;font-weight:700;}
+
+.progress-bar-wrap{background:var(--card);padding:10px 1.25rem;border-bottom:1px solid var(--border);}
+.progress-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px;}
+.progress-track{background:var(--border);border-radius:99px;height:7px;}
+.progress-fill{background:linear-gradient(90deg,var(--purple),var(--purple2));border-radius:99px;height:7px;transition:width .5s ease;}
+
+.lesson-body{padding:1.25rem;padding-bottom:2rem;}
+
+/* concept card */
+.concept-card{background:var(--card);border-radius:18px;border:1.5px solid var(--border);padding:1.25rem;margin-bottom:1rem;box-shadow:var(--shadow);}
+.concept-tag{display:inline-block;background:var(--purple-l);color:var(--purple);font-size:10px;font-weight:800;padding:3px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
+.concept-title{font-size:17px;font-weight:900;color:var(--text);margin-bottom:8px;}
+.concept-body{font-size:14px;color:var(--text);line-height:1.8;}
+.concept-body strong{color:var(--purple);}
+.example-box{background:var(--purple-l);border-radius:12px;padding:12px 14px;margin-top:12px;}
+.example-label{font-size:10px;font-weight:800;color:var(--purple);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+.frac-big{display:flex;flex-direction:column;align-items:center;display:inline-flex;margin:0 8px;vertical-align:middle;}
+.frac-top{font-size:28px;font-weight:900;color:var(--teal);border-bottom:3px solid var(--text);padding:0 10px;line-height:1.2;}
+.frac-bot{font-size:28px;font-weight:900;color:var(--purple);padding:0 10px;line-height:1.2;}
+
+/* problem card */
+.prob-card{background:var(--card);border-radius:18px;border:1.5px solid var(--purple-l);padding:1.25rem;margin-bottom:1rem;box-shadow:var(--shadow);}
+.prob-num{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+.prob-q{font-size:15px;font-weight:700;color:var(--text);line-height:1.7;margin-bottom:14px;}
+.prob-q em{color:var(--purple);font-style:normal;font-weight:900;}
+.answer-wrap{display:flex;gap:8px;}
+.ans-input{flex:1;border:2px solid var(--border);border-radius:12px;padding:11px 14px;font-family:'Nunito',sans-serif;font-size:16px;font-weight:700;color:var(--text);background:var(--bg);outline:none;transition:.2s;}
+.ans-input:focus{border-color:var(--purple);}
+.ans-input.ok{border-color:var(--teal);background:var(--teal-l);}
+.ans-input.no{border-color:var(--coral);background:var(--coral-l);}
+.check-btn{background:var(--purple);color:#fff;border:none;border-radius:12px;padding:11px 18px;font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;cursor:pointer;transition:.2s;}
+.check-btn:hover{background:#5538E0;}
+.check-btn:disabled{opacity:.4;cursor:default;}
+.feedback{margin-top:10px;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:700;display:none;}
+.feedback.ok{background:var(--teal-l);color:var(--teal-d);display:block;}
+.feedback.no{background:var(--coral-l);color:var(--coral-d);display:block;}
+.feedback.hint{background:var(--amber-l);color:var(--amber-d);display:block;}
+.hint-btn{background:none;border:1.5px solid var(--amber);color:var(--amber);border-radius:10px;padding:6px 14px;font-family:'Nunito',sans-serif;font-weight:700;font-size:12px;cursor:pointer;margin-top:8px;transition:.2s;}
+.hint-btn:hover{background:var(--amber-l);}
+.next-btn{background:var(--teal);color:#fff;border:none;border-radius:12px;padding:10px 22px;font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;cursor:pointer;margin-top:10px;display:none;transition:.2s;}
+.next-btn.show{display:inline-block;}
+.next-btn:hover{background:#059669;}
+
+.xp-pop{position:fixed;top:80px;right:20px;background:var(--purple);color:#fff;border-radius:99px;padding:8px 16px;font-weight:900;font-size:14px;opacity:0;transition:.3s;pointer-events:none;z-index:100;}
+.xp-pop.show{opacity:1;transform:translateY(-8px);}
+
+/* ══ RESULTS ══ */
+#results{background:linear-gradient(145deg,#F4F1FF,#EDE9FE,#FDF4FF);align-items:center;justify-content:flex-start;padding:2rem 1.5rem;text-align:center;}
+.trophy-anim{font-size:72px;animation:pop .5s cubic-bezier(.36,.07,.19,.97);}
+@keyframes pop{0%{transform:scale(0) rotate(-10deg)}70%{transform:scale(1.15) rotate(3deg)}100%{transform:scale(1) rotate(0)}}
+.res-title{font-family:'Baloo 2',cursive;font-size:2rem;font-weight:800;color:var(--purple);margin:.5rem 0 .25rem;}
+.res-sub{font-size:14px;color:var(--muted);margin-bottom:1.5rem;line-height:1.6;}
+.res-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:400px;margin-bottom:1.5rem;}
+.res-stat{background:var(--card);border-radius:12px;border:1px solid var(--border);padding:12px 6px;text-align:center;}
+.res-stat-val{font-size:22px;font-weight:900;color:var(--purple);}
+.res-stat-lbl{font-size:10px;color:var(--muted);font-weight:700;}
+.coach-card{background:var(--card);border-radius:16px;border:1.5px solid var(--border);padding:1.25rem;margin-bottom:1.25rem;width:100%;max-width:400px;text-align:left;}
+.coach-tag{font-size:11px;font-weight:800;color:var(--purple);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+.coach-msg{font-size:14px;color:var(--text);line-height:1.7;}
+.badges-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:1.5rem;}
+.badge-chip{background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:8px 14px;font-size:12px;font-weight:700;color:var(--text);}
+.res-btns{display:flex;flex-direction:column;gap:10px;width:100%;max-width:400px;}
+.btn-p{background:var(--purple);color:#fff;border:none;border-radius:14px;padding:14px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;transition:.2s;width:100%;}
+.btn-p:hover{background:#5538E0;}
+.btn-s{background:var(--card);color:var(--purple);border:2px solid var(--purple);border-radius:14px;padding:13px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;transition:.2s;width:100%;}
+.btn-s:hover{background:var(--purple-l);}
+
+/* ══ PARENT ══ */
+#parent{background:var(--bg);}
+.parent-hdr{background:var(--text);color:#fff;padding:1rem 1.25rem;display:flex;align-items:center;gap:10px;}
+.parent-hdr-title{flex:1;font-size:16px;font-weight:800;}
+.parent-body{padding:1.25rem;}
+.parent-section{margin-bottom:1.5rem;}
+.parent-section-title{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+.parent-stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.parent-stat{background:var(--card);border-radius:14px;border:1px solid var(--border);padding:14px;}
+.parent-stat-val{font-size:24px;font-weight:900;color:var(--purple);}
+.parent-stat-lbl{font-size:11px;color:var(--muted);margin-top:2px;}
+.topic-progress-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.topic-progress-name{font-size:13px;font-weight:700;flex:1;color:var(--text);}
+.topic-progress-bar{flex:2;background:var(--border);border-radius:99px;height:8px;}
+.topic-progress-fill{background:var(--teal);border-radius:99px;height:8px;transition:width .6s;}
+.topic-progress-pct{font-size:12px;font-weight:700;color:var(--muted);min-width:32px;text-align:right;}
+.session-row{background:var(--card);border-radius:12px;border:1px solid var(--border);padding:10px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px;}
+.session-date{font-size:12px;font-weight:700;color:var(--muted);min-width:80px;}
+.session-topic{font-size:13px;font-weight:700;color:var(--text);flex:1;}
+.session-score{font-size:13px;font-weight:900;color:var(--teal);}
+
+/* ══ PIN MODAL ══ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:200;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--card);border-radius:20px;padding:1.75rem;width:calc(100% - 3rem);max-width:340px;text-align:center;}
+.modal-title{font-family:'Baloo 2',cursive;font-size:1.3rem;font-weight:800;color:var(--text);margin-bottom:.5rem;}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:1.25rem;}
+.pin-input{border:2px solid var(--border);border-radius:12px;padding:12px;font-family:'Nunito',sans-serif;font-size:20px;font-weight:900;text-align:center;letter-spacing:8px;width:100%;outline:none;margin-bottom:12px;}
+.pin-input:focus{border-color:var(--purple);}
+.modal-btns{display:flex;gap:8px;}
+.modal-btn{flex:1;border:none;border-radius:12px;padding:12px;font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;cursor:pointer;}
+.modal-btn.primary{background:var(--purple);color:#fff;}
+.modal-btn.secondary{background:var(--border);color:var(--muted);}
+
+/* ══ REVIEW TEST ══ */
+#review{background:var(--bg);}
+.review-hdr{background:linear-gradient(135deg,var(--amber),#F97316);color:#fff;padding:1rem 1.25rem;display:flex;align-items:center;gap:10px;}
+
+/* ══ CONFETTI ══ */
+.confetti{position:fixed;pointer-events:none;z-index:999;}
+.c-piece{position:absolute;width:8px;height:8px;border-radius:2px;animation:cffall 1.4s ease-in forwards;}
+@keyframes cffall{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+
+/* ══ MOTIVATIONAL QUOTE ══ */
+.quote-card{margin:0 1.5rem .75rem;background:linear-gradient(135deg,var(--purple),var(--purple2));border-radius:16px;padding:14px 16px;color:#fff;}
+.quote-text{font-size:13px;font-weight:600;line-height:1.6;font-style:italic;}
+.quote-author{font-size:11px;opacity:.75;margin-top:4px;font-weight:700;}
+</style>
+</head>
+<body>
+
+<!-- ══════════ HOME ══════════ -->
+<div id="home" class="screen active">
+  <div class="home-top">
+    <div class="app-logo">⭐ NJSLA Math Coach</div>
+    <div class="app-tagline">Your personal path to general ed classes</div>
+  </div>
+
+  <div class="student-card">
+    <div class="avatar">G</div>
+    <div>
+      <div class="student-name">Guhan 👋</div>
+      <div class="student-sub">8th Grade · Somerset County, NJ</div>
+    </div>
+    <div class="level-pill" id="level-pill">Beginner</div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat"><div class="stat-val" id="home-streak">0🔥</div><div class="stat-lbl">Streak</div></div>
+    <div class="stat"><div class="stat-val" id="home-xp">0</div><div class="stat-lbl">XP</div></div>
+    <div class="stat"><div class="stat-val" id="home-mastered">0</div><div class="stat-lbl">Mastered</div></div>
+  </div>
+
+  <div class="quote-card"><div class="quote-text" id="daily-quote">"Every expert was once a beginner. Keep going!"</div><div class="quote-author">— Your Coach</div></div>
+
+  <div id="review-banner" class="review-banner" onclick="startReview()">
+    <div style="font-size:24px;">🔔</div>
+    <div class="review-text">
+      <div class="review-title">Review Test Due!</div>
+      <div class="review-sub">Time to test what you've learned. Tap to start!</div>
+    </div>
+    <div style="font-size:20px;">→</div>
+  </div>
+
+  <div class="section-title">Choose how to learn today</div>
+  <div class="mode-row">
+    <div class="mode-btn selected" id="mode-choose" onclick="setMode('choose')"><div class="mode-icon">🎯</div><div class="mode-lbl">I Choose</div></div>
+    <div class="mode-btn" id="mode-surprise" onclick="setMode('surprise')"><div class="mode-icon">🎲</div><div class="mode-lbl">Surprise!</div></div>
+    <div class="mode-btn" id="mode-mix" onclick="setMode('mix')"><div class="mode-icon">🌀</div><div class="mode-lbl">Mix It Up</div></div>
+  </div>
+
+  <div class="section-title">Topics</div>
+  <div class="topic-list" id="topic-list"></div>
+
+  <button class="parent-btn" onclick="openParent()">👨‍👩‍👦 Parent Progress View</button>
+
+  <button class="start-fab" id="start-fab" onclick="startLesson()">Start Today's Lesson 🚀</button>
+</div>
+
+<!-- ══════════ LESSON ══════════ -->
+<div id="lesson" class="screen">
+  <div class="lesson-hdr">
+    <button class="back-btn" onclick="goHome()">← Home</button>
+    <div class="lesson-hdr-info">
+      <div class="lesson-hdr-day" id="lhdr-day">Day 1</div>
+      <div class="lesson-hdr-name" id="lhdr-name">What is a fraction?</div>
+    </div>
+    <div class="timer-chip" id="lesson-timer">0:00</div>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-meta">
+      <span id="prog-label">Problem 0 of 0</span>
+      <span id="prog-xp">+0 XP earned</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="lesson-body" id="lesson-body"></div>
+</div>
+
+<!-- ══════════ RESULTS ══════════ -->
+<div id="results" class="screen">
+  <div class="trophy-anim" id="res-trophy">🏆</div>
+  <div class="res-title" id="res-title">Session Complete!</div>
+  <p class="res-sub" id="res-sub"></p>
+  <div class="res-stats">
+    <div class="res-stat"><div class="res-stat-val" id="rs-correct">0</div><div class="res-stat-lbl">Correct</div></div>
+    <div class="res-stat"><div class="res-stat-val" id="rs-total">0</div><div class="res-stat-lbl">Problems</div></div>
+    <div class="res-stat"><div class="res-stat-val" id="rs-xp">0</div><div class="res-stat-lbl">XP</div></div>
+    <div class="res-stat"><div class="res-stat-val" id="rs-time">0m</div><div class="res-stat-lbl">Time</div></div>
+  </div>
+  <div class="badges-row" id="res-badges"></div>
+  <div class="coach-card">
+    <div class="coach-tag">Coach says 💬</div>
+    <div class="coach-msg" id="res-coach"></div>
+  </div>
+  <div class="res-btns">
+    <button class="btn-p" onclick="goHome()">Back to Dashboard 🏠</button>
+    <button class="btn-s" onclick="retryLesson()">Practice Again 🔁</button>
+  </div>
+</div>
+
+<!-- ══════════ PARENT VIEW ══════════ -->
+<div id="parent" class="screen">
+  <div class="parent-hdr">
+    <button class="back-btn" onclick="goHome()" style="background:rgba(255,255,255,.15);">← Back</button>
+    <div class="parent-hdr-title">Parent Progress Portal</div>
+  </div>
+  <div class="parent-body" id="parent-body"></div>
+</div>
+
+<!-- ══════════ REVIEW TEST ══════════ -->
+<div id="review" class="screen">
+  <div class="review-hdr">
+    <button class="back-btn" onclick="goHome()" style="background:rgba(255,255,255,.2);">← Home</button>
+    <div class="lesson-hdr-info">
+      <div class="lesson-hdr-day">Review Test</div>
+      <div class="lesson-hdr-name">Mixed Concepts</div>
+    </div>
+    <div class="timer-chip" id="review-timer">0:00</div>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-meta">
+      <span id="rev-prog-label">Question 0 of 0</span>
+      <span id="rev-prog-xp">+0 XP</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="rev-prog-fill" style="width:0%;background:linear-gradient(90deg,var(--amber),#F97316);"></div></div>
+  </div>
+  <div class="lesson-body" id="review-body"></div>
+</div>
+
+<!-- PIN MODAL -->
+<div class="modal-overlay" id="pin-modal">
+  <div class="modal">
+    <div class="modal-title">Parent Access 👨‍👩‍👦</div>
+    <div class="modal-sub" id="pin-sub">Enter the 4-digit PIN to view progress</div>
+    <input class="pin-input" id="pin-input" type="password" maxlength="4" placeholder="••••">
+    <div class="modal-btns">
+      <button class="modal-btn secondary" onclick="closePin()">Cancel</button>
+      <button class="modal-btn primary" onclick="checkPin()">Enter</button>
+    </div>
+  </div>
+</div>
+
+<!-- XP Pop -->
+<div class="xp-pop" id="xp-pop">+10 XP</div>
+
+<script>
+// ═══════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════
+const TOPICS = [
+  { id:'fractions-intro', icon:'🍕', name:'What is a fraction?', meta:'Numerator, denominator, parts of a whole',
+    concept:`A <strong>fraction</strong> shows a PART of something whole. It has two numbers:<br><br>
+    • <strong>TOP number (numerator)</strong> = the part you have or ate<br>
+    • <strong>BOTTOM number (denominator)</strong> = total pieces in the whole<br>
+    • The line in the middle just means <strong>"out of"</strong><br><br>
+    So 3/4 means: <strong>3 out of 4 equal pieces!</strong> No adding, no subtracting — just find the two numbers.`,
+    example:'A pizza cut into 8 slices. You eat 3. Fraction = 3/8 (3 out of 8).',
+    problems:[
+      {q:'A pizza has <em>8</em> slices. You eat <em>3</em> slices. What fraction did you eat?', a:'3/8', h1:'Top = slices YOU ate. Bottom = total slices. Write as top/bottom.', h2:'You ate 3 out of 8 slices → 3/8'},
+      {q:'A chocolate bar has <em>6</em> equal pieces. You eat <em>2</em>. What fraction?', a:'2/6', h1:'Find the two numbers in the sentence. Which is your part? Which is the total?', h2:'You ate 2 out of 6 → 2/6'},
+      {q:'A sandwich is cut into <em>4</em> pieces. You eat <em>1</em>. What fraction?', a:'1/4', h1:'Top = what you ate (1). Bottom = total pieces (4).', h2:'1 out of 4 → 1/4'},
+      {q:'A pie has <em>10</em> slices. You eat <em>4</em>. What fraction?', a:'4/10', h1:'The two numbers are right in the sentence!', h2:'4 out of 10 → 4/10'},
+      {q:'A cake has <em>12</em> pieces. You eat <em>1</em>, your friend eats <em>1</em>. What fraction together?', a:'2/12', h1:'Add your pieces first: 1 + 1 = ? That is the top number.', h2:'Together you ate 2 out of 12 → 2/12'},
+      {q:'A bag has <em>10</em> cookies. You eat <em>2</em>, your sister eats <em>3</em>. What fraction together?', a:'5/10', h1:'Add first: 2 + 3 = ? Then write the fraction.', h2:'Total eaten = 5 out of 10 → 5/10'},
+      {q:'A juice box has <em>12</em> sips. You take <em>3</em>, friend takes <em>4</em>, other friend takes <em>2</em>. Fraction together?', a:'9/12', h1:'Add all three: 3 + 4 + 2 = ? That is the top.', h2:'9 out of 12 → 9/12'},
+    ]
+  },
+  { id:'comparing', icon:'⚖️', name:'Comparing fractions', meta:'Which fraction is bigger?',
+    concept:`<strong>Which fraction is bigger?</strong> Two easy tricks:<br><br>
+    <strong>TRICK 1 — Same bottom number?</strong><br>
+    Just compare the tops! 3/8 > 2/8 because 3 > 2.<br><br>
+    <strong>TRICK 2 — Same top number?</strong><br>
+    Smaller bottom = BIGGER fraction!<br>
+    1/3 > 1/6 because thirds are bigger slices than sixths.<br><br>
+    Think pizza: 1 slice from a pizza cut into 3 is BIGGER than 1 slice from a pizza cut into 8!`,
+    example:'Compare 3/8 vs 5/8 → same bottom (8), bigger top wins → 5/8 is bigger!',
+    problems:[
+      {q:'Which is bigger: <em>3/8</em> or <em>5/8</em>? Type the bigger fraction.', a:'5/8', h1:'Same bottom number (8). Just compare the tops: 3 vs 5.', h2:'5 > 3, so 5/8 is bigger → 5/8'},
+      {q:'Which is bigger: <em>2/5</em> or <em>2/9</em>? Type the bigger fraction.', a:'2/5', h1:'Same top (2). Smaller bottom = bigger fraction. Which bottom is smaller?', h2:'5 < 9, so 2/5 is bigger → 2/5'},
+      {q:'Which is bigger: <em>4/7</em> or <em>2/7</em>? Type the bigger fraction.', a:'4/7', h1:'Same bottom (7). Compare the tops.', h2:'4 > 2, so 4/7 → 4/7'},
+      {q:'Which is bigger: <em>1/4</em> or <em>1/8</em>? Type the bigger fraction.', a:'1/4', h1:'Same top (1). Which bottom is smaller? Smaller bottom = bigger slice!', h2:'4 < 8, so 1/4 is bigger → 1/4'},
+      {q:'Which is bigger: <em>6/10</em> or <em>3/10</em>? Type the bigger fraction.', a:'6/10', h1:'Same bottom (10). Which top is bigger?', h2:'6 > 3, so 6/10 → 6/10'},
+      {q:'Which is bigger: <em>1/2</em> or <em>1/6</em>? Type the bigger fraction.', a:'1/2', h1:'Same top (1). Smaller bottom = bigger. Which bottom is smaller?', h2:'2 < 6, so 1/2 → 1/2'},
+      {q:'Which is bigger: <em>7/12</em> or <em>5/12</em>? Type the bigger fraction.', a:'7/12', h1:'Same bottom (12). Compare the tops.', h2:'7 > 5, so 7/12 → 7/12'},
+    ]
+  },
+  { id:'adding', icon:'➕', name:'Adding fractions', meta:'Same bottom: keep it, add the tops',
+    concept:`<strong>Adding fractions with the SAME bottom number is easy!</strong><br><br>
+    RULE: Keep the bottom the SAME. Just add the tops!<br><br>
+    Example: 2/8 + 3/8 = ?<br>
+    Step 1: Keep the bottom → 8<br>
+    Step 2: Add the tops → 2 + 3 = 5<br>
+    Answer: <strong>5/8</strong><br><br>
+    Think pizza: 2 slices + 3 slices from the same pizza = 5 slices total!`,
+    example:'1/6 + 2/6 = ? Keep bottom (6), add tops: 1+2=3 → Answer: 3/6',
+    problems:[
+      {q:'Add: <em>2/8 + 3/8</em> = ?', a:'5/8', h1:'Keep the bottom (8). Add just the tops: 2 + 3 = ?', h2:'2+3=5, bottom stays 8 → 5/8'},
+      {q:'Add: <em>1/6 + 2/6</em> = ?', a:'3/6', h1:'Keep the bottom (6). Add the tops: 1 + 2 = ?', h2:'1+2=3, bottom stays 6 → 3/6'},
+      {q:'Add: <em>3/10 + 4/10</em> = ?', a:'7/10', h1:'Keep bottom (10). Add: 3 + 4 = ?', h2:'7/10'},
+      {q:'Add: <em>1/5 + 3/5</em> = ?', a:'4/5', h1:'Keep bottom (5). Add: 1 + 3 = ?', h2:'4/5'},
+      {q:'Add: <em>2/12 + 5/12</em> = ?', a:'7/12', h1:'Keep bottom (12). Add: 2 + 5 = ?', h2:'7/12'},
+      {q:'Add: <em>4/9 + 3/9</em> = ?', a:'7/9', h1:'Keep bottom (9). Add: 4 + 3 = ?', h2:'7/9'},
+      {q:'Add: <em>1/7 + 4/7</em> = ?', a:'5/7', h1:'Keep bottom (7). Add: 1 + 4 = ?', h2:'5/7'},
+    ]
+  },
+  { id:'decimals', icon:'💲', name:'Fractions & decimals', meta:'Converting between the two',
+    concept:`Converting a fraction to a decimal is just <strong>DIVIDING</strong>!<br><br>
+    TOP ÷ BOTTOM = decimal<br><br>
+    • 1/2 = 1 ÷ 2 = <strong>0.5</strong><br>
+    • 1/4 = 1 ÷ 4 = <strong>0.25</strong> (like a quarter dollar!)<br>
+    • 3/4 = 3 ÷ 4 = <strong>0.75</strong> (like 75 cents!)<br>
+    • 1/5 = 1 ÷ 5 = <strong>0.2</strong><br>
+    • 1/10 = <strong>0.1</strong><br><br>
+    Memory trick: the fraction bar <strong>MEANS divide</strong>. Top ÷ Bottom!`,
+    example:'3/4 → 3 ÷ 4 = 0.75 (think: 3 quarters = $0.75!)',
+    problems:[
+      {q:'Convert <em>1/2</em> to a decimal:', a:'0.5', h1:'Divide the top by the bottom: 1 ÷ 2 = ?', h2:'1 ÷ 2 = 0.5'},
+      {q:'Convert <em>1/4</em> to a decimal:', a:'0.25', h1:'1 ÷ 4 = ? Think: one quarter coin = how many dollars?', h2:'0.25 (like $0.25!)'},
+      {q:'Convert <em>3/4</em> to a decimal:', a:'0.75', h1:'3 ÷ 4 = ? Think: 3 quarters = how many dollars?', h2:'0.75 (like $0.75!)'},
+      {q:'Convert <em>1/5</em> to a decimal:', a:'0.2', h1:'1 ÷ 5 = ? Split $1 into 5 equal parts.', h2:'Each part = $0.20 → 0.2'},
+      {q:'Convert <em>2/5</em> to a decimal:', a:'0.4', h1:'2 ÷ 5. Hint: 1/5 = 0.2, so 2/5 = 2 × 0.2 = ?', h2:'2 × 0.2 = 0.4'},
+      {q:'Convert <em>3/5</em> to a decimal:', a:'0.6', h1:'3 ÷ 5. Hint: 1/5 = 0.2, so 3/5 = 3 × 0.2 = ?', h2:'3 × 0.2 = 0.6'},
+      {q:'Convert <em>1/10</em> to a decimal:', a:'0.1', h1:'1 ÷ 10. Move the decimal point one place left.', h2:'0.1'},
+    ]
+  },
+  { id:'wordproblems', icon:'📖', name:'Word problem basics', meta:'Read, find, plan, solve',
+    concept:`Word problems are just <strong>stories with math hiding inside</strong>!<br><br>
+    <strong>YOUR 4-STEP PLAN:</strong><br>
+    Step 1 — READ slowly (read it twice!)<br>
+    Step 2 — FIND the numbers (circle them)<br>
+    Step 3 — FIND the question (what is it asking?)<br>
+    Step 4 — SOLVE<br><br>
+    <strong>Key words:</strong><br>
+    • "total, altogether, in all" → ADD<br>
+    • "left, remaining, difference" → SUBTRACT<br>
+    • "fraction, part of, out of" → FRACTION`,
+    example:'"Maria has 12 stickers. Gives away 4. How many left?" → LEFT = subtract → 12-4 = 8',
+    problems:[
+      {q:'Maria has <em>12</em> stickers. She gives <em>4</em> to a friend. How many does she have <em>left</em>?', a:'8', h1:'The word "left" means subtract. 12 - 4 = ?', h2:'12 - 4 = 8'},
+      {q:'Jake scored <em>7</em> points. His friend scored <em>5</em>. How many <em>altogether</em>?', a:'12', h1:'"Altogether" means add. 7 + 5 = ?', h2:'7 + 5 = 12'},
+      {q:'A class has <em>30</em> students. <em>15</em> are girls. What <em>fraction</em> are girls?', a:'15/30', h1:'Top = girls (15). Bottom = total students (30).', h2:'15/30'},
+      {q:'A bag has <em>20</em> marbles. <em>8</em> are red. What <em>fraction</em> are red?', a:'8/20', h1:'Top = red marbles. Bottom = total marbles.', h2:'8/20'},
+      {q:'There are <em>24</em> students. One-fourth (<em>1/4</em>) walk to school. How many walk?', a:'6', h1:'1/4 of 24 means divide: 24 ÷ 4 = ?', h2:'24 ÷ 4 = 6'},
+      {q:'A store has <em>50</em> apples. They sell <em>23</em>. How many <em>remain</em>?', a:'27', h1:'"Remain" means subtract. 50 - 23 = ?', h2:'50 - 23 = 27'},
+      {q:'In a class of <em>28</em> students, <em>14</em> are boys. What <em>fraction</em> are boys?', a:'14/28', h1:'Top = boys (14). Bottom = total (28).', h2:'14/28'},
+    ]
+  },
+  { id:'fractions-word', icon:'🧩', name:'Fractions in word problems', meta:'Putting it all together',
+    concept:`Now we put it ALL TOGETHER — <strong>fractions inside word problems!</strong><br><br>
+    <strong>YOUR STRATEGY:</strong><br>
+    1. Read slowly — find ALL the numbers<br>
+    2. Asking for a FRACTION? → find part and total<br>
+    3. Need to ADD fractions? → keep bottom, add tops<br>
+    4. Need to COMPARE? → use your tricks<br><br>
+    The numbers are ALWAYS hiding right inside the sentence. Never guess — find them!`,
+    example:'"Tom ate 2/8, Sara ate 3/8 of the same pizza. Together?" → 2/8 + 3/8 = 5/8',
+    problems:[
+      {q:'A pizza has <em>8</em> slices. Tom ate <em>2</em>, Sara ate <em>3</em>. What fraction together?', a:'5/8', h1:'Add their slices first: 2 + 3 = ? That is the top. Bottom = 8.', h2:'5 out of 8 → 5/8'},
+      {q:'A class has <em>32</em> students. <em>8</em> play basketball. What fraction play basketball?', a:'8/32', h1:'Top = basketball players. Bottom = total students.', h2:'8/32'},
+      {q:'Add these fractions from a recipe: <em>1/8 + 3/8</em> = ?', a:'4/8', h1:'Same bottom (8). Add the tops: 1 + 3 = ?', h2:'4/8'},
+      {q:'A bag has <em>15</em> candies. You eat <em>5</em>. What fraction did you eat?', a:'5/15', h1:'Top = what you ate (5). Bottom = total candies (15).', h2:'5/15'},
+      {q:'Which fraction of juice is more: <em>3/6</em> or <em>4/6</em>?', a:'4/6', h1:'Same bottom. Compare the tops: 3 vs 4.', h2:'4 > 3, so 4/6 is more → 4/6'},
+      {q:'A field has <em>20</em> flowers. <em>6</em> are red, <em>4</em> are yellow. What fraction are NOT red or yellow?', a:'10/20', h1:'Red + yellow = 6 + 4 = 10. Not red/yellow = 20 - 10 = 10. Fraction = ?/20', h2:'10 out of 20 → 10/20'},
+      {q:'Sarah ran <em>3/10</em> of a mile. Then ran <em>4/10</em> more. How far in total?', a:'7/10', h1:'Add the fractions: same bottom (10), add tops: 3 + 4 = ?', h2:'7/10 of a mile'},
+    ]
+  },
+  { id:'ratios', icon:'📊', name:'Ratios & proportions', meta:'Comparing two quantities',
+    concept:`A <strong>ratio</strong> compares two numbers. Written as 2:3 or 2/3.<br><br>
+    Example: In a class of 5 boys and 3 girls:<br>
+    • Ratio of boys to girls = <strong>5:3</strong><br>
+    • Ratio of girls to total = <strong>3:8</strong><br><br>
+    A <strong>proportion</strong> says two ratios are equal:<br>
+    1/2 = 2/4 = 3/6 (all equal halves!)<br><br>
+    Cross multiply to check: 1×4 = 2×2 ✓`,
+    example:'If 2 pencils cost $1, how much for 6 pencils? 2:1 = 6:? → ? = $3',
+    problems:[
+      {q:'A class has <em>6</em> boys and <em>4</em> girls. What is the ratio of boys to girls? (write as 6:4)', a:'6:4', h1:'Ratio = boys : girls. Put boys first, girls second.', h2:'6:4'},
+      {q:'For every <em>3</em> red marbles there are <em>5</em> blue ones. What is the ratio of red to blue?', a:'3:5', h1:'Ratio = red : blue.', h2:'3:5'},
+      {q:'Is 1/2 equal to 3/6? Type yes or no.', a:'yes', h1:'Cross multiply: 1×6 = 6 and 2×3 = 6. Are they equal?', h2:'6 = 6, so yes they are equal → yes'},
+      {q:'If 2 apples cost $<em>4</em>, how much do <em>6</em> apples cost?', a:'12', h1:'Set up: 2 apples = $4, so 1 apple = $2. Then 6 × $2 = ?', h2:'6 × $2 = $12 → 12'},
+      {q:'A recipe uses <em>2</em> cups flour for <em>12</em> cookies. How many cups for <em>24</em> cookies?', a:'4', h1:'24 cookies is double 12 cookies. So double the flour too.', h2:'2 × 2 = 4 cups → 4'},
+      {q:'Ratio of wins to losses is 4:2. If there are <em>8</em> wins, how many losses?', a:'4', h1:'4:2 = 8:? The wins doubled (4→8), so losses double too.', h2:'2 × 2 = 4 → 4'},
+      {q:'In a group of <em>20</em> people, the ratio of adults to kids is 3:2. How many kids?', a:'8', h1:'Total parts = 3+2 = 5. Each part = 20÷5 = 4. Kids = 2 parts = 2×4 = ?', h2:'2 × 4 = 8 → 8'},
+    ]
+  },
+  { id:'percentages', icon:'💯', name:'Percentages', meta:'Fractions out of 100',
+    concept:`A <strong>percentage</strong> is just a fraction out of 100!<br><br>
+    • 50% = 50/100 = 1/2 = 0.5<br>
+    • 25% = 25/100 = 1/4 = 0.25<br>
+    • 10% = 10/100 = 1/10 = 0.1<br><br>
+    <strong>Finding % of a number:</strong><br>
+    25% of 80 = (25 ÷ 100) × 80 = 0.25 × 80 = <strong>20</strong><br><br>
+    Shortcut: 10% = divide by 10. 50% = divide by 2!`,
+    example:'What is 25% of 40? → 25/100 × 40 = 0.25 × 40 = 10',
+    problems:[
+      {q:'What is <em>50%</em> of <em>20</em>?', a:'10', h1:'50% means divide by 2. 20 ÷ 2 = ?', h2:'20 ÷ 2 = 10'},
+      {q:'What is <em>10%</em> of <em>80</em>?', a:'8', h1:'10% means divide by 10. 80 ÷ 10 = ?', h2:'80 ÷ 10 = 8'},
+      {q:'What is <em>25%</em> of <em>40</em>?', a:'10', h1:'25% = 1/4. Divide 40 by 4.', h2:'40 ÷ 4 = 10'},
+      {q:'Write <em>75%</em> as a decimal:', a:'0.75', h1:'Percent means out of 100. 75 ÷ 100 = ?', h2:'0.75'},
+      {q:'Write <em>0.4</em> as a percentage:', a:'40%', h1:'Multiply by 100 to convert. 0.4 × 100 = ?', h2:'40%'},
+      {q:'A shirt costs <em>$30</em>. It is on sale for <em>10%</em> off. How much do you save?', a:'3', h1:'10% of $30. Divide by 10.', h2:'30 ÷ 10 = $3 → 3'},
+      {q:'In a class of <em>20</em> students, <em>5</em> are absent. What percentage is absent?', a:'25%', h1:'Fraction absent = 5/20. Convert to %: (5÷20) × 100 = ?', h2:'(5÷20) × 100 = 25%'},
+    ]
+  },
+  { id:'algebra', icon:'🔢', name:'Algebra basics', meta:'Solving for the unknown (x)',
+    concept:`Algebra uses a <strong>letter (like x)</strong> to stand for a missing number.<br><br>
+    Think of it like a balance scale — whatever you do to one side, do it to the other!<br><br>
+    Example: x + 3 = 7<br>
+    To find x, subtract 3 from both sides:<br>
+    x + 3 - 3 = 7 - 3<br>
+    x = <strong>4</strong><br><br>
+    Check: 4 + 3 = 7 ✓ Always check your answer!`,
+    example:'x - 5 = 10 → add 5 to both sides → x = 15. Check: 15-5=10 ✓',
+    problems:[
+      {q:'Solve: <em>x + 3 = 7</em>. What is x?', a:'4', h1:'Subtract 3 from both sides. 7 - 3 = ?', h2:'x = 4. Check: 4+3=7 ✓'},
+      {q:'Solve: <em>x - 5 = 10</em>. What is x?', a:'15', h1:'Add 5 to both sides. 10 + 5 = ?', h2:'x = 15. Check: 15-5=10 ✓'},
+      {q:'Solve: <em>x + 8 = 12</em>. What is x?', a:'4', h1:'Subtract 8 from both sides.', h2:'12 - 8 = 4 → x = 4'},
+      {q:'Solve: <em>2x = 10</em>. What is x?', a:'5', h1:'Divide both sides by 2. 10 ÷ 2 = ?', h2:'x = 5. Check: 2×5=10 ✓'},
+      {q:'Solve: <em>x ÷ 3 = 4</em>. What is x?', a:'12', h1:'Multiply both sides by 3. 4 × 3 = ?', h2:'x = 12. Check: 12÷3=4 ✓'},
+      {q:'Solve: <em>x + 15 = 30</em>. What is x?', a:'15', h1:'Subtract 15 from both sides.', h2:'30 - 15 = 15 → x = 15'},
+      {q:'If <em>3x = 21</em>, what is x?', a:'7', h1:'Divide both sides by 3.', h2:'21 ÷ 3 = 7 → x = 7'},
+    ]
+  },
+  { id:'geometry', icon:'📐', name:'Geometry basics', meta:'Area and perimeter',
+    concept:`<strong>Perimeter</strong> = the distance all the way around a shape (add all sides).<br>
+    <strong>Area</strong> = the space inside a shape.<br><br>
+    <strong>Rectangle formulas:</strong><br>
+    • Perimeter = 2 × (length + width)<br>
+    • Area = length × width<br><br>
+    <strong>Square formulas (all sides equal):</strong><br>
+    • Perimeter = 4 × side<br>
+    • Area = side × side<br><br>
+    Think of area like tiles on a floor — how many fit?`,
+    example:'Rectangle 5×3: Perimeter = 2×(5+3) = 16. Area = 5×3 = 15 square units.',
+    problems:[
+      {q:'A rectangle is <em>6</em> units long and <em>4</em> units wide. What is the <em>area</em>?', a:'24', h1:'Area = length × width. 6 × 4 = ?', h2:'6 × 4 = 24 square units → 24'},
+      {q:'A rectangle is <em>5</em> units long and <em>3</em> units wide. What is the <em>perimeter</em>?', a:'16', h1:'Perimeter = 2 × (length + width) = 2 × (5+3) = ?', h2:'2 × 8 = 16 → 16'},
+      {q:'A square has sides of <em>7</em> units. What is the <em>area</em>?', a:'49', h1:'Area of square = side × side. 7 × 7 = ?', h2:'7 × 7 = 49 → 49'},
+      {q:'A square has sides of <em>9</em> units. What is the <em>perimeter</em>?', a:'36', h1:'Perimeter of square = 4 × side. 4 × 9 = ?', h2:'4 × 9 = 36 → 36'},
+      {q:'A room is <em>10</em> feet long and <em>8</em> feet wide. How many square feet of carpet needed?', a:'80', h1:'Carpet needed = area = length × width.', h2:'10 × 8 = 80 square feet → 80'},
+      {q:'A garden has <em>perimeter = 24</em> meters. If it is a square, how long is each side?', a:'6', h1:'Square perimeter = 4 × side. So side = 24 ÷ 4 = ?', h2:'24 ÷ 4 = 6 → 6'},
+      {q:'A rectangle has area = <em>36</em> square units and length = <em>9</em>. What is the width?', a:'4', h1:'Area = length × width. 36 = 9 × ? → 36 ÷ 9 = ?', h2:'36 ÷ 9 = 4 → 4'},
+    ]
+  }
+];
+
+const QUOTES = [
+  "Every expert was once a beginner. Keep going!",
+  "You don't have to be perfect. You just have to keep trying.",
+  "Small progress every day leads to big results.",
+  "The harder you work, the luckier you get.",
+  "Believe in yourself — your coach does!",
+  "One problem at a time. You've got this!",
+  "Your future self will thank you for studying today.",
+  "Mistakes are proof that you are trying!",
+  "General ed classes are waiting for you. Keep pushing!",
+  "You proved today that you can do this math. Keep proving it!"
+];
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let state = {
+  xp:0, streak:0, lastDate:'', mastered:[], sessions:[],
+  currentTopic:0, mode:'choose', selectedTopic:0,
+  hintCount:0, correct:0, total:0, sessionXP:0,
+  timerSec:0, timerInt:null, problemIdx:0,
+  reviewDue:false, earnedBadges:[]
+};
+
+function save(){ localStorage.setItem('njsla_state', JSON.stringify(state)); }
+function load(){
+  const d = localStorage.getItem('njsla_state');
+  if(d){ Object.assign(state, JSON.parse(d)); }
+  checkStreak();
+}
+function checkStreak(){
+  const today = new Date().toDateString();
+  if(state.lastDate !== today){
+    const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
+    if(state.lastDate !== yesterday.toDateString()) state.streak = 0;
+  }
+}
+
+function getLevel(xp){
+  if(xp>=2001) return 'Champion 🏆';
+  if(xp>=1001) return 'NJSLA Ready 🎓';
+  if(xp>=501) return 'Math Explorer 🔭';
+  if(xp>=201) return 'Rising Star ⭐';
+  return 'Beginner 🌱';
+}
+
+function addXP(amt, label){
+  state.xp += amt; state.sessionXP += amt;
+  const pop = document.getElementById('xp-pop');
+  pop.textContent = label || `+${amt} XP`;
+  pop.classList.add('show');
+  setTimeout(()=>pop.classList.remove('show'), 1200);
+  save();
+}
+
+// ═══════════════════════════════════════
+// HOME
+// ═══════════════════════════════════════
+function renderHome(){
+  document.getElementById('home-streak').textContent = state.streak + '🔥';
+  document.getElementById('home-xp').textContent = state.xp;
+  document.getElementById('home-mastered').textContent = state.mastered.length;
+  document.getElementById('level-pill').textContent = getLevel(state.xp);
+
+  // quote
+  const qi = new Date().getDate() % QUOTES.length;
+  document.getElementById('daily-quote').textContent = '"' + QUOTES[qi] + '"';
+
+  // review banner
+  const rb = document.getElementById('review-banner');
+  rb.classList.toggle('show', state.reviewDue);
+
+  // topic list
+  const tl = document.getElementById('topic-list');
+  tl.innerHTML = '';
+  TOPICS.forEach((t,i)=>{
+    const done = state.mastered.includes(t.id);
+    const locked = i > 0 && !state.mastered.includes(TOPICS[i-1].id) && !done;
+    const div = document.createElement('div');
+    div.className = 'topic-row' + (done?' mastered':'') + (locked?' locked':'');
+    div.innerHTML = `
+      <div class="topic-icon">${t.icon}</div>
+      <div class="topic-info">
+        <div class="topic-name">${t.name}</div>
+        <div class="topic-meta">${t.meta}</div>
+      </div>
+      <span class="topic-badge ${done?'badge-done':locked?'badge-lock':'badge-new'}">${done?'✓ Done':locked?'🔒':'Ready'}</span>`;
+    if(!locked){
+      div.onclick = ()=>{
+        document.querySelectorAll('.topic-row').forEach(r=>r.style.border='');
+        div.style.border='2px solid var(--purple)';
+        state.selectedTopic = i;
+        state.mode='choose';
+        document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('selected'));
+        document.getElementById('mode-choose').classList.add('selected');
+      };
+    }
+    tl.appendChild(div);
+  });
+
+  // select first available
+  if(state.mode==='choose'){
+    const firstAvail = TOPICS.findIndex((t,i)=>!state.mastered.includes(t.id) && (i===0||state.mastered.includes(TOPICS[i-1].id)));
+    state.selectedTopic = firstAvail>=0?firstAvail:0;
+  }
+}
+
+function setMode(m){
+  state.mode=m;
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('mode-'+m).classList.add('selected');
+}
+
+function startLesson(){
+  let idx = state.selectedTopic;
+  if(state.mode==='surprise'){
+    const avail = TOPICS.filter((t,i)=>!state.mastered.includes(t.id)&&(i===0||state.mastered.includes(TOPICS[i-1].id)));
+    idx = TOPICS.indexOf(avail[Math.floor(Math.random()*avail.length)]);
+  } else if(state.mode==='mix'){
+    const avail = TOPICS.filter((t,i)=>!state.mastered.includes(t.id)&&(i===0||state.mastered.includes(TOPICS[i-1].id)));
+    idx = TOPICS.indexOf(avail[Math.floor(Math.random()*avail.length)]);
+  }
+  if(idx<0) idx=0;
+  state.currentTopic=idx; state.problemIdx=0; state.correct=0; state.total=0; state.sessionXP=0; state.hintCount=0;
+  showScreen('lesson');
+  renderLesson();
+  startTimer('lesson-timer');
+}
+
+// ═══════════════════════════════════════
+// LESSON
+// ═══════════════════════════════════════
+function renderLesson(){
+  const t = TOPICS[state.currentTopic];
+  document.getElementById('lhdr-day').textContent = `Topic ${state.currentTopic+1} of ${TOPICS.length}`;
+  document.getElementById('lhdr-name').textContent = t.name;
+  updateProgress();
+  const body = document.getElementById('lesson-body');
+  body.innerHTML = '';
+
+  // concept card
+  const cc = document.createElement('div');
+  cc.className='concept-card';
+  cc.innerHTML=`<div class="concept-tag">📘 Today's Concept</div>
+    <div class="concept-title">${t.icon} ${t.name}</div>
+    <div class="concept-body">${t.concept}</div>
+    <div class="example-box"><div class="example-label">📝 Example</div><div class="concept-body">${t.example}</div></div>`;
+  body.appendChild(cc);
+
+  // render first problem
+  renderProblem(body, 0);
+}
+
+function renderProblem(body, idx){
+  const t = TOPICS[state.currentTopic];
+  if(idx >= t.problems.length){ showResults(); return; }
+  const p = t.problems[idx];
+  state.total++;
+  updateProgress();
+  const card = document.createElement('div');
+  card.className='prob-card'; card.id='prob-card-'+idx;
+  card.innerHTML=`<div class="prob-num">Problem ${idx+1} of ${t.problems.length}</div>
+    <div class="prob-q">${p.q}</div>
+    <div class="answer-wrap">
+      <input class="ans-input" id="ans-${idx}" placeholder="Type your answer..." autocomplete="off" autocorrect="off" spellcheck="false">
+      <button class="check-btn" id="chk-${idx}" onclick="checkAnswer(${idx})">Check ✓</button>
+    </div>
+    <div class="feedback" id="fb-${idx}"></div>
+    <button class="hint-btn" id="hint-${idx}" onclick="showHint(${idx},1)">💡 Need a hint?</button>
+    <button class="next-btn" id="next-${idx}" onclick="nextProblem(${idx})">Next Problem →</button>`;
+  body.appendChild(card);
+  const inp = document.getElementById('ans-'+idx);
+  inp.addEventListener('keydown', e=>{ if(e.key==='Enter') checkAnswer(idx); });
+  inp.focus();
+}
+
+function checkAnswer(idx){
+  const t = TOPICS[state.currentTopic];
+  const p = t.problems[idx];
+  const inp = document.getElementById('ans-'+idx);
+  const val = inp.value.trim().toLowerCase().replace(/\s/g,'');
+  const correct = p.a.toLowerCase().replace(/\s/g,'');
+  const fb = document.getElementById('fb-'+idx);
+  const nxt = document.getElementById('next-'+idx);
+  const chk = document.getElementById('chk-'+idx);
+  chk.disabled=true;
+  if(val===correct){
+    inp.classList.add('ok');
+    const firstTry = document.getElementById('hint-'+idx).dataset.used !== '1';
+    const xpEarned = firstTry ? 10 : 5;
+    fb.className='feedback ok';
+    fb.textContent = firstTry
+      ? `🎉 PERFECT! First try! +${xpEarned} XP — You are on fire, Guhan!`
+      : `✅ Correct! +${xpEarned} XP — Great job working through it!`;
+    addXP(xpEarned, `+${xpEarned} XP`);
+    state.correct++;
+    nxt.classList.add('show');
+    confetti();
+  } else {
+    inp.classList.add('no');
+    const hintUsed = document.getElementById('hint-'+idx).dataset.used === '1';
+    fb.className='feedback no';
+    fb.textContent = `Not quite! Try again or use the hint. You can do this! 💪`;
+    chk.disabled=false; inp.classList.remove('no');
+    if(!hintUsed) showHint(idx,1);
+    else showHint(idx,2);
+  }
+}
+
+function showHint(idx, level){
+  const t = TOPICS[state.currentTopic];
+  const p = t.problems[idx];
+  const fb = document.getElementById('fb-'+idx);
+  const hb = document.getElementById('hint-'+idx);
+  hb.dataset.used='1';
+  fb.className='feedback hint';
+  fb.textContent = level===1 ? `💡 Hint: ${p.h1}` : `💡 Bigger hint: ${p.h2}`;
+  hb.style.display='none';
+  state.hintCount++;
+}
+
+function nextProblem(idx){
+  state.problemIdx = idx+1;
+  const t = TOPICS[state.currentTopic];
+  if(state.problemIdx >= t.problems.length){ showResults(); return; }
+  const body = document.getElementById('lesson-body');
+  renderProblem(body, state.problemIdx);
+  document.getElementById('prob-card-'+state.problemIdx).scrollIntoView({behavior:'smooth'});
+}
+
+function updateProgress(){
+  const t = TOPICS[state.currentTopic];
+  const pct = t.problems.length>0 ? Math.round((state.problemIdx/t.problems.length)*100) : 0;
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=`Problem ${Math.min(state.problemIdx+1,t.problems.length)} of ${t.problems.length}`;
+  document.getElementById('prog-xp').textContent=`+${state.sessionXP} XP earned`;
+}
+
+// ═══════════════════════════════════════
+// RESULTS
+// ═══════════════════════════════════════
+function showResults(){
+  stopTimer();
+  const t = TOPICS[state.currentTopic];
+  const pct = state.total>0 ? Math.round((state.correct/state.total)*100) : 0;
+
+  // check mastery
+  if(pct>=70 && !state.mastered.includes(t.id)){
+    state.mastered.push(t.id);
+    addXP(25, '+25 XP Mastered!');
+  }
+
+  // bonus XP for completion
+  addXP(50, '+50 XP Session!');
+
+  // check review due
+  if(state.mastered.length>0 && state.mastered.length%3===0) state.reviewDue=true;
+
+  // streak
+  const today=new Date().toDateString();
+  if(state.lastDate!==today){ state.streak++; state.lastDate=today; }
+
+  // session history
+  state.sessions.unshift({date:today,topic:t.name,score:pct,xp:state.sessionXP,time:Math.round(state.timerSec/60)});
+  if(state.sessions.length>20) state.sessions.pop();
+  save();
+
+  // badges
+  const badges=[];
+  if(pct===100) badges.push('🌟 Perfect Day');
+  if(state.hintCount===0) badges.push('🧠 No Hints Needed');
+  if(state.streak>=3) badges.push('🔥 On Fire');
+  if(state.streak>=7) badges.push('🏆 Week Warrior');
+  if(pct>=70) badges.push('🎓 Concept Mastered');
+
+  document.getElementById('res-trophy').textContent = pct===100?'🏆':pct>=70?'⭐':'💪';
+  document.getElementById('res-title').textContent = pct===100?'PERFECT SESSION!':pct>=70?'Great Work!':'Keep Going!';
+  document.getElementById('res-sub').textContent = `You scored ${pct}% on ${t.name}. ${pct>=70?'Topic mastered!':'Practice makes perfect — try again!'}`;
+  document.getElementById('rs-correct').textContent = state.correct;
+  document.getElementById('rs-total').textContent = state.total;
+  document.getElementById('rs-xp').textContent = state.sessionXP;
+  document.getElementById('rs-time').textContent = Math.round(state.timerSec/60)+'m';
+
+  const bd=document.getElementById('res-badges'); bd.innerHTML='';
+  badges.forEach(b=>{ const s=document.createElement('span'); s.className='badge-chip'; s.textContent=b; bd.appendChild(s); });
+
+  const msgs = [
+    `You are getting closer to those general ed classes every single day, Guhan! ${pct===100?'100% — PERFECT!':'Keep that fire going!'}`,
+    `Every problem you solve is a step forward. You showed up today and that matters! 🌟`,
+    `Remember why you started — those bigger classes are waiting for you. ${state.streak} day streak! 🔥`,
+    `Your Tamil pride and NJ hustle are showing! You are unstoppable! 💪`
+  ];
+  document.getElementById('res-coach').textContent = msgs[Math.floor(Math.random()*msgs.length)];
+  showScreen('results');
+  if(pct>=70) confetti();
+}
+
+function retryLesson(){ state.problemIdx=0; state.correct=0; state.total=0; state.sessionXP=0; state.hintCount=0; showScreen('lesson'); renderLesson(); startTimer('lesson-timer'); }
+
+// ═══════════════════════════════════════
+// REVIEW TEST
+// ═══════════════════════════════════════
+function startReview(){
+  state.reviewDue=false; save();
+  showScreen('review');
+  const body=document.getElementById('review-body'); body.innerHTML='';
+  const masteredTopics=TOPICS.filter(t=>state.mastered.includes(t.id));
+  const pool=[];
+  masteredTopics.forEach(t=>{ const p=t.problems[Math.floor(Math.random()*t.problems.length)]; pool.push({...p,topicName:t.name}); });
+  const cc=document.createElement('div'); cc.className='concept-card';
+  cc.innerHTML=`<div class="concept-tag">🔔 Review Test</div><div class="concept-title">Mixed Concepts</div><div class="concept-body">Time to show what you know! These are problems from topics you've already learned. You've got this, Guhan! 💪</div>`;
+  body.appendChild(cc);
+  pool.forEach((p,i)=>{
+    const card=document.createElement('div'); card.className='prob-card';
+    card.innerHTML=`<div class="prob-num">Review ${i+1}: ${p.topicName}</div>
+      <div class="prob-q">${p.q}</div>
+      <div class="answer-wrap">
+        <input class="ans-input" id="rev-ans-${i}" placeholder="Type your answer..." autocomplete="off">
+        <button class="check-btn" onclick="checkReview(${i},'${p.a.replace(/'/g,"\\'")}')">Check ✓</button>
+      </div>
+      <div class="feedback" id="rev-fb-${i}"></div>
+      <button class="hint-btn" onclick="showRevHint(${i},'${p.h1.replace(/'/g,"\\'")}')">💡 Hint</button>
+      <button class="next-btn" id="rev-next-${i}">Next →</button>`;
+    body.appendChild(card);
+    document.getElementById('rev-next-'+i).addEventListener('click',()=>document.getElementById('rev-next-'+i).closest('.prob-card').nextElementSibling?.scrollIntoView({behavior:'smooth'}));
+  });
+  startTimer('review-timer');
+}
+
+function checkReview(idx,ans){
+  const inp=document.getElementById('rev-ans-'+idx);
+  const val=inp.value.trim().toLowerCase().replace(/\s/g,'');
+  const fb=document.getElementById('rev-fb-'+idx);
+  const nxt=document.getElementById('rev-next-'+idx);
+  if(val===ans.toLowerCase().replace(/\s/g,'')){
+    inp.classList.add('ok'); fb.className='feedback ok'; fb.textContent='🎉 Correct! Great memory!';
+    addXP(10,'+10 XP'); nxt.classList.add('show'); if(Math.random()>.5)confetti();
+  } else {
+    fb.className='feedback no'; fb.textContent='Not quite — check your hint and try again! 💪';
+  }
+}
+function showRevHint(idx,h){ const fb=document.getElementById('rev-fb-'+idx); fb.className='feedback hint'; fb.textContent='💡 '+h; }
+
+// ═══════════════════════════════════════
+// PARENT VIEW
+// ═══════════════════════════════════════
+const PARENT_PIN='1234';
+function openParent(){ document.getElementById('pin-modal').classList.add('show'); document.getElementById('pin-input').value=''; document.getElementById('pin-sub').textContent='Enter 4-digit PIN to view progress (default: 1234)'; }
+function closePin(){ document.getElementById('pin-modal').classList.remove('show'); }
+function checkPin(){
+  const pin=document.getElementById('pin-input').value;
+  if(pin===PARENT_PIN){ closePin(); showScreen('parent'); renderParent(); }
+  else { document.getElementById('pin-sub').textContent='❌ Wrong PIN. Try again.'; document.getElementById('pin-input').value=''; }
+}
+
+function renderParent(){
+  const body=document.getElementById('parent-body'); body.innerHTML='';
+  const totalSessions=state.sessions.length;
+  const avgScore=totalSessions>0?Math.round(state.sessions.reduce((a,s)=>a+s.score,0)/totalSessions):0;
+  body.innerHTML=`
+    <div class="parent-section">
+      <div class="parent-section-title">Overview</div>
+      <div class="parent-stat-grid">
+        <div class="parent-stat"><div class="parent-stat-val">${totalSessions}</div><div class="parent-stat-lbl">Sessions completed</div></div>
+        <div class="parent-stat"><div class="parent-stat-val">${state.mastered.length}/${TOPICS.length}</div><div class="parent-stat-lbl">Topics mastered</div></div>
+        <div class="parent-stat"><div class="parent-stat-val">${state.xp}</div><div class="parent-stat-lbl">Total XP earned</div></div>
+        <div class="parent-stat"><div class="parent-stat-val">${state.streak}🔥</div><div class="parent-stat-lbl">Day streak</div></div>
+      </div>
+    </div>
+    <div class="parent-section">
+      <div class="parent-section-title">Topic Progress</div>
+      ${TOPICS.map(t=>`
+        <div class="topic-progress-row">
+          <div class="topic-progress-name">${t.icon} ${t.name}</div>
+          <div class="topic-progress-bar"><div class="topic-progress-fill" style="width:${state.mastered.includes(t.id)?100:0}%"></div></div>
+          <div class="topic-progress-pct">${state.mastered.includes(t.id)?'✓':'—'}</div>
+        </div>`).join('')}
+    </div>
+    <div class="parent-section">
+      <div class="parent-section-title">Recent Sessions</div>
+      ${state.sessions.slice(0,8).map(s=>`
+        <div class="session-row">
+          <div class="session-date">${s.date.split(' ').slice(1,3).join(' ')}</div>
+          <div class="session-topic">${s.topic}</div>
+          <div class="session-score">${s.score}%</div>
+        </div>`).join('') || '<div style="color:var(--muted);font-size:13px;padding:10px 0;">No sessions yet. Start learning!</div>'}
+    </div>
+    <div class="parent-section">
+      <div class="parent-section-title">Coach Notes</div>
+      <div class="concept-card">
+        <div class="concept-body">
+          Guhan is working hard on NJSLA Math preparation. 
+          ${state.mastered.length===0?'Just getting started — encourage daily practice!':
+          `Has mastered ${state.mastered.length} topic(s) so far. `+
+          (state.mastered.length<3?'Focus areas: Fractions & Decimals and Word Problems.':'Making great progress toward general education classes!')}
+          Current level: <strong>${getLevel(state.xp)}</strong>. 
+          ${state.streak>=3?`On a ${state.streak}-day streak — amazing consistency!`:'Encourage daily 30-40 minute sessions for best results.'}
+        </div>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════
+// TIMER
+// ═══════════════════════════════════════
+function startTimer(id){
+  state.timerSec=0; stopTimer();
+  state.timerInt=setInterval(()=>{
+    state.timerSec++;
+    const m=Math.floor(state.timerSec/60); const s=state.timerSec%60;
+    const el=document.getElementById(id);
+    if(el) el.textContent=m+':'+(s<10?'0':'')+s;
+  },1000);
+}
+function stopTimer(){ clearInterval(state.timerInt); state.timerInt=null; }
+
+// ═══════════════════════════════════════
+// SCREENS
+// ═══════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function goHome(){ stopTimer(); showScreen('home'); renderHome(); }
+
+// ═══════════════════════════════════════
+// CONFETTI
+// ═══════════════════════════════════════
+function confetti(){
+  const colors=['#6C4EF6','#10B981','#F59E0B','#F43F5E','#3B82F6','#A78BFA'];
+  for(let i=0;i<18;i++){
+    const p=document.createElement('div');
+    p.className='c-piece';
+    p.style.cssText=`left:${Math.random()*100}vw;top:0;background:${colors[Math.floor(Math.random()*colors.length)]};animation-delay:${Math.random()*.5}s;animation-duration:${1+Math.random()*.8}s;border-radius:${Math.random()>0.5?'50%':'2px'};`;
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(),2000);
+  }
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+load();
+renderHome();
+</script>
+</body>
+</html>
